@@ -20,6 +20,7 @@ STATUS_sessionTimeOut = "91"
 STATUS_authenticationError = "92"
 STATUS_otherError = "99"
 
+#--------------- Model ------------------
 class Document(BaseModel):
     id: str
     title: str
@@ -32,6 +33,12 @@ class Folder(BaseModel):
     folder_id: str
     folder_name: str
 
+class DeviceInfo(BaseModel):
+    id: str
+    name: str
+    regist_date: str
+
+#--------------- Request ------------------
 class RequestDataUpdateDraft(BaseModel):
     device_id: str
     document_id: str
@@ -41,6 +48,7 @@ class RequestDataUpdateDraft(BaseModel):
     document_last_update: str
     document_overwrite: bool
 
+#--------------- Response ------------------
 class ResponseStatusCode(BaseModel):
     status: str
 
@@ -65,11 +73,15 @@ class ResponseUpdateDrafts(BaseModel):
     status: str
     last_update: str
 
-class DeviceInfo(BaseModel):
-    id: str
-    name: str
-    regist_date: str
+class ResponseDevices(BaseModel):
+    status: str
+    devices: List[DeviceInfo]
 
+class ResponseAccountName(BaseModel):
+    status: str
+    account_name: str
+
+#--------------- DB ------------------
 fakeDB_docs = [
     Document(
         id = "1",
@@ -100,24 +112,26 @@ fakeDB_folders = [
     )
 ]
 
+fakeDB_devices = [
+    DeviceInfo(
+        id = "3D626A85-2634-4514-B49A-0013FBDF511A",
+        name = "iPhone 12",
+        regist_date = "20210121"
+    ),
+    DeviceInfo(
+        id = "ED8C2079-E22C-4445-B493-A075E154570F",
+        name = "iPhone 6S",
+        regist_date = "20210121"
+    )
+]
 
+#--------------- API ------------------
 @app.get("/api/v1/devices/")
 def getRegisteredDevices():
-    return {
-        "status": "00",
-        "devices": [
-            {
-                "id": "1953AFD4-D484-4A4A-85A1-3883ADEA4518",
-                "name": "iPhone 12",
-                "regist_date": "20210121"
-            },
-            {
-                "id": "ED8C2079-E22C-4445-B493-A075E154570F",
-                "name": "iPhone 6S",
-                "regist_date": "20210121"
-            }
-        ]
-    }
+    return ResponseDevices(
+        status = STATUS_normal,
+        devices = fakeDB_devices
+    )
 
 
 @app.post("/api/v1/devices/delete/")
@@ -137,7 +151,7 @@ def addDevice():
 @app.get("/api/v1/status/")
 def getAPIStatus():
     return ResponseStatusCode(
-        status = STATUS_otherError
+        status = STATUS_normal
     )
 
 
@@ -187,7 +201,7 @@ def moveDrafts():
 @app.get("/api/v1/folders/")
 def getFolderList():
     return ResponseFolders(
-        status = STATUS_maintenance,
+        status = STATUS_normal,
         devices = fakeDB_folders
     )
 
@@ -208,10 +222,11 @@ def deleteFolder():
 
 @app.get("/api/v1/account/")
 def getAccountInfo():
-    return {
-        "status": "00",
-        "account_name": "hihi"
-    }
+    return ResponseAccountName(
+        status = STATUS_normal,
+        account_name = "hihi"
+    ) 
+
 
 @app.get("/api/v1/ios_device_name/{device_code}")
 def getDeviceName(device_code: str):
