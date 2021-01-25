@@ -3,7 +3,7 @@ Build a simple server with FastAPI
 https://fastapi.tiangolo.com
 
 # Setup
-- First: install python
+- Install python
 
 - Install FastAPI and Uvicorn
 "pip install fastapi"
